@@ -26,3 +26,9 @@ Made the following changes gto the tsconfig.json file:
     "rootDir": "./src"
  ```
 
+## Push to Git
+After the initial setup, I created the initial commit.
+Executed: git branch -M main
+to rename the current branch to main.
+Pushed my code using:  git push -u origin main
+
