@@ -1,6 +1,10 @@
 import fs from 'fs';
 import readline from 'readline';
+import AstPrinter from './ast-printer';
+import Parser from './parser/parser';
 import Scanner from './tokenizer/scanner';
+import Token from './tokenizer/token';
+import TokenType from './tokenizer/token-type';
 
 export default class Lox {
   private static hadError = false;
@@ -41,10 +45,13 @@ export default class Lox {
     const scanner = new Scanner(source);
     const tokens = scanner.scanTokens();
 
-    // For now, just print the tokens.
-    tokens.forEach(token => {
-      console.log(token);        
-    });
+    const parser = new Parser(tokens);
+    const expression = parser.parse();
+
+    // Stop if there was a syntax error.
+    if (this.hadError) return;
+
+    if (expression) console.log(new AstPrinter().print(expression));
   }
 
   static error(line: number, message: string): void {
@@ -52,8 +59,20 @@ export default class Lox {
   }
 
   private static report(line: number, where: string, message: string): void {
-    console.error(`[line: ${line}] Error: ${where+message}`);
+    if (where === '') {
+      console.error(`[line: ${line}] Error:${message}`);
+    } else {
+      console.error(`[line: ${line}] Error:${where} ${message}`);
+    }
     Lox.hadError = true;
+  }
+
+  static parseError(token: Token, message: string): void {
+    if (token.type == TokenType.EOF) {
+      this.report(token.line, 'at end', message);
+    } else {
+      this.report(token.line, 'at \'' + token.lexeme + '\'', message);
+    }
   }
 
 }
