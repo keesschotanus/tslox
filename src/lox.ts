@@ -1,13 +1,18 @@
 import fs from 'fs';
 import readline from 'readline';
 import AstPrinter from './ast-printer';
+import Interpreter from './interpreter';
 import Parser from './parser/parser';
+import RuntimeError from './runtime-error';
 import Scanner from './tokenizer/scanner';
 import Token from './tokenizer/token';
 import TokenType from './tokenizer/token-type';
 
 export default class Lox {
   private static hadError = false;
+  private static hadRuntimeError = false;
+
+  private static readonly interpreter = new Interpreter();
 
   public static main(): void {
     if (process.argv.length > 3) {
@@ -25,6 +30,7 @@ export default class Lox {
 
     // Indicate an error in the exit code.
     if (Lox.hadError) process.exit(65);
+    if (Lox.hadRuntimeError) process.exit(70);
   }
  
   private static runPrompt(): void {
@@ -51,7 +57,9 @@ export default class Lox {
     // Stop if there was a syntax error.
     if (this.hadError) return;
 
-    if (expression) console.log(new AstPrinter().print(expression));
+    if (expression) {
+      Lox.interpreter.interpret(expression);
+    }
   }
 
   static error(line: number, message: string): void {
@@ -73,6 +81,11 @@ export default class Lox {
     } else {
       this.report(token.line, 'at \'' + token.lexeme + '\'', message);
     }
+  }
+
+  static runtimeError(error: RuntimeError): void {
+    console.error(`${error.message}\n[line ${error.token.line}]`);
+    this.hadRuntimeError = true;
   }
 
 }
