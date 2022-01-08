@@ -1,6 +1,6 @@
-import Expr from "./expr";
-import Token from "../tokenizer/token";
-import Visitor from "./visitor";
+import Expr from './expr';
+import Token from '../tokenizer/token';
+import Visitor from './visitor';
 
 export default class Binary extends Expr {
 
@@ -12,4 +12,3 @@ export default class Binary extends Expr {
     return visitor.visitBinaryExpr(this);
   }
 }
-

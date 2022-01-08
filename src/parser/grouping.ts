@@ -11,4 +11,3 @@ export default class Grouping extends Expr {
     return visitor.visitGroupingExpr(this);
   }
 }
-

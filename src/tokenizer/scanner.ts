@@ -1,4 +1,3 @@
-import Literal from "./literal";
 import Lox from "../lox";
 import Token from "./token";
 import TokenType from "./token-type";
@@ -21,11 +20,10 @@ export default class Scanner {
     'true': TokenType.TRUE,
     'var': TokenType.VAR,
     'while': TokenType.WHILE,
-  }
+  };
 
   private source: string;
-  private tokens: Token[] = [];
-
+  private readonly tokens: Token[] = [];
   private start = 0;
   private current = 0;
   private line = 1;
@@ -65,7 +63,7 @@ export default class Scanner {
       case '/':
         if (this.match('/')) {
           // A comment goes until the end of the line.
-          while (this.peek() != '\n' && !this.isAtEnd()) this.advance();
+          while (this.peek() !== '\n' && !this.isAtEnd()) this.advance();
         } else {
           this.addToken(TokenType.SLASH);
         }
@@ -86,8 +84,8 @@ export default class Scanner {
           this.identifier();
         } else {
           Lox.error(this.line, 'Unexpected character: ' + c);
-          break;
         }
+        break;
     }
   }
 
@@ -114,8 +112,8 @@ export default class Scanner {
   }
 
   private string(): void {
-    while (this.peek() != '"' && !this.isAtEnd()) {
-      if (this.peek() == '\n') this.line++;
+    while (this.peek() !== '"' && !this.isAtEnd()) {
+      if (this.peek() === '\n') this.line++;
       this.advance();
     }
 
@@ -128,12 +126,13 @@ export default class Scanner {
     this.advance();
 
     // Trim the surrounding quotes.
-    this.addToken(TokenType.STRING, this.source.substring(this.start + 1, this.current - 1));
+    const value = this.source.substring(this.start + 1, this.current - 1);
+    this.addToken(TokenType.STRING, value);
   }
 
-  private match(expectedChar: string): boolean {
+  private match(expected: string): boolean {
     if (this.isAtEnd()) return false;
-    if (this.source.charAt(this.current) != expectedChar) return false;
+    if (this.source.charAt(this.current) !== expected) return false;
 
     this.current++;
     return true;
@@ -147,7 +146,7 @@ export default class Scanner {
   private peekNext(): string {
     if (this.current + 1 >= this.source.length) return '\0';
     return this.source.charAt(this.current + 1);
-  }
+  } 
 
   private isAlpha(c: string): boolean {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
@@ -157,9 +156,9 @@ export default class Scanner {
     return this.isAlpha(c) || this.isDigit(c);
   }
 
-  private isDigit(c: string) {
+  private isDigit(c: string): boolean {
     return c >= '0' && c <= '9';
-  }
+  } 
 
   private isAtEnd(): boolean {
     return this.current >= this.source.length;
@@ -169,7 +168,7 @@ export default class Scanner {
     return this.source.charAt(this.current++);
   }
 
-  private addToken(type: TokenType, literal: Literal | null = null): void {
+  private addToken(type: TokenType, literal: number | string | null = null): void {
     const text = this.source.substring(this.start, this.current);
     this.tokens.push(new Token(type, text, literal, this.line));
   }
