@@ -52,4 +52,4 @@ export default class AstPrinter implements Visitor<string> {
   }
 }
 
-AstPrinter.main();
+// AstPrinter.main();
