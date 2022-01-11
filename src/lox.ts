@@ -1,14 +1,17 @@
 import fs from 'fs';
 import readline from 'readline';
-import AstPrinter from './ast-printer';
-import Expr from './parser/expr';
+import Interpreter from './interpreter';
 import Parser from './parser';
+import RuntimeError from './runtime-error';
 import Scanner from './tokenizer/scanner';
 import Token from './tokenizer/token';
 import TokenType from './tokenizer/token-type';
 
 export default class Lox {
+  private static readonly interpreter = new Interpreter();
   private static hadError = false;
+  private static hadRuntimeError = false;
+
 
   /**
    * argv[0] = node
@@ -33,9 +36,14 @@ export default class Lox {
     if (Lox.hadError) {
       process.exit(65);
     }
+    if (Lox.hadRuntimeError) {
+      process.exit(70);
+    }
   }
 
   private static runPrompt(): void {
+    Lox.run('2+3');
+
     process.stdout.write('> ');
     const io = readline.createInterface({
       input: process.stdin,
@@ -59,7 +67,7 @@ export default class Lox {
     // Stop if there was a syntax error.
     if (this.hadError) return;
 
-    console.log(new AstPrinter().print(expression as Expr));
+    if (expression !== null) this.interpreter.interpret(expression);
   }
 
   static error(line: number, message: string): void {
@@ -83,6 +91,12 @@ export default class Lox {
       Lox.report(token.line, ' at "' + token.lexeme + '"', message);
     }
   }
+
+  static runtimeError(error: RuntimeError ): void {
+    console.log(`${error.message} \n [line ${error.token.line}]`);
+    Lox.hadRuntimeError = true;
+  }
+
 }
 
 Lox.main();
